@@ -23,6 +23,8 @@ public class Query implements GraphQLQueryResolver {
         return authorRepository.findAll();
     }
 
+    public Iterable<Book> findBooksByName(String name) {return bookRepository.findByTitle(name);}
+
     public long countBooks() {
         return bookRepository.count();
     }
