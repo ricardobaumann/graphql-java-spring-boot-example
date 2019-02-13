@@ -7,6 +7,8 @@ import com.example.DemoGraphQL.model.Book;
 import com.example.DemoGraphQL.repository.AuthorRepository;
 import com.example.DemoGraphQL.repository.BookRepository;
 
+import java.util.Optional;
+
 public class Mutation implements GraphQLMutationResolver {
     private BookRepository bookRepository;
     private AuthorRepository authorRepository;
@@ -39,19 +41,18 @@ public class Mutation implements GraphQLMutationResolver {
     }
 
     public boolean deleteBook(Long id) {
-        bookRepository.delete(id);
+        bookRepository.findById(id)
+                .ifPresent(bookRepository::delete);
         return true;
     }
 
     public Book updateBookPageCount(Integer pageCount, Long id) {
-        Book book = bookRepository.findOne(id);
-        if(book == null) {
-            throw new BookNotFoundException("The book to be updated was found", id);
-        }
-        book.setPageCount(pageCount);
+        return bookRepository.findById(id)
+        .map(book -> {
+            book.setPageCount(pageCount);
 
-        bookRepository.save(book);
-
-        return book;
+            return bookRepository.save(book);
+        })
+        .orElseThrow(() -> new BookNotFoundException("The book to be updated was found", id));
     }
 }
